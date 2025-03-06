@@ -18,7 +18,7 @@ We used these resources to better understand how to navigate PostgreSQL, effecti
 We used 'Interactive Terminal', 'Postgres Starter Tutorial', and 'Privileges' to learn useful psql terminal commands and share our table with all members of the group.
 Some commands we learned include '\l' to list databases, '\dt' to list tables, and '\o' to output query results to a file. \
 We used 'Create Table Command' and 'Copy Command' in our SQL script to create a table with all of the columns we needed and copy data into if from our .csv file.
-Additionally, for the ER diagram, we followed relational database best practices to structure entities based on real-world relationships, using only attributes from the dataset without additions. Crow’s Foot notation was used to define 1:1, 1:0 or 1, and M:1 relationships, with Loan_Application as the central entity linking to Applicant, Co_Applicant, Loan_Type, Agency, Property, Geographic_Location, and Denial_Reasons.
+Additionally, for the ER diagram, we followed relational database best practices to structure entities based on real-world relationships, using attributes from the dataset. Crow’s Foot notation was used to define 1:1, 1:0 or 1, and M:1 relationships, with Loan_Application as the central entity linking to Applicant, Co_Applicant, Loan_Type, Agency, Property, Geographic_Location, and Denial_Reasons.
 Using these resources we were able to effectively collaborate to complete the assignment.
 
 Links:\
