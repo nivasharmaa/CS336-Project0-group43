@@ -1,0 +1,1 @@
+\copy preliminary FROM '/common/home/rfp46/Downloads/hmda_2017_all-records_lables.csv' WITH DELIMITER ',' CSV HEADER;
