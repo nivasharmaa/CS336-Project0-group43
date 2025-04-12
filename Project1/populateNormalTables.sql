@@ -187,8 +187,48 @@ AND NOT EXISTS (
 
 
 
+
+-- INSERT INTO ApplicantRaces(applicant_id, race, race_number)
+-- SELECT DISTINCT id, race, race_number FROM preliminary;
+
 INSERT INTO ApplicantRaces(applicant_id, race, race_number)
-SELECT DISTINCT id, race, race_number FROM preliminary;
+SELECT DISTINCT id, race, race_number
+FROM (
+    SELECT id, applicant_race_1 AS race, 1 as race_number FROM preliminary
+    UNION
+    SELECT id, applicant_race_2 AS race, 2 as race_number FROM preliminary
+    UNION
+    SELECT id, applicant_race_3 AS race, 3 as race_number FROM preliminary
+    UNION
+    SELECT id, applicant_race_4 AS race, 4 as race_number FROM preliminary
+    UNION
+    SELECT id, applicant_race_5 AS race, 5 as race_number FROM preliminary
+) AS combined
+WHERE race IS NOT NULL
+AND NOT EXISTS (
+    SELECT 1 FROM ApplicantRaces a
+    WHERE a.applicant_id = combined.id AND a.race_number = combined.race_number
+);
+
+
+-- INSERT INTO CoApplicantRaces(co_applicant_id, race, race_number)
+-- SELECT DISTINCT id, race, race_number FROM preliminary;
 
 INSERT INTO CoApplicantRaces(co_applicant_id, race, race_number)
-SELECT DISTINCT id, race, race_number FROM preliminary;
+SELECT DISTINCT id, race, race_number
+FROM (
+    SELECT id, co_applicant_race_1 AS race, 1 as race_number FROM preliminary
+    UNION
+    SELECT id, co_applicant_race_2 AS race, 2 as race_number FROM preliminary
+    UNION
+    SELECT id, co_applicant_race_3 AS race, 3 as race_number FROM preliminary
+    UNION
+    SELECT id, co_applicant_race_4 AS race, 4 as race_number FROM preliminary
+    UNION
+    SELECT id, co_applicant_race_5 AS race, 5 as race_number FROM preliminary
+) AS combined
+WHERE race IS NOT NULL
+AND NOT EXISTS (
+    SELECT 1 FROM CoApplicantRaces c
+    WHERE c.co_applicant_id = combined.id AND c.race_number = combined.race_number
+);
