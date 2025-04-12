@@ -95,37 +95,44 @@ edit_status_name TEXT NOT NULL
 
 
 CREATE TABLE IF NOT EXISTS Applicant(
-applicant_id SERIAL PRIMARY KEY, 
+applicant_id INTEGER PRIMARY KEY, 
 applicant_ethnicity INTEGER REFERENCES Ethnicities, 
 applicant_sex INTEGER REFERENCES Sexes, 
 applicant_income_000s INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS Coapplicant(
-co_applicant_id SERIAL PRIMARY KEY, 
+co_applicant_id INTEGER PRIMARY KEY, 
 co_applicant_ethnicity INTEGER REFERENCES Ethnicities, 
 co_applicant_sex INTEGER REFERENCES Sexes
 );
 
-CREATE TABLE IF NOT EXISTS Property(
-property_id SERIAL PRIMARY KEY,
-property_type INTEGER REFERENCES PropertyTypes,
-owner_occupancy INTEGER REFERENCES OwnerOccupancies,
-location_id INTEGER REFERENCES Location
-);
+
 
 CREATE TABLE IF NOT EXISTS Location(
 location_id SERIAL PRIMARY KEY, 
 msamd INTEGER REFERENCES Msamds, 
 state_code INTEGER REFERENCES States, 
 county_code INTEGER REFERENCES Counties, 
-census_tract_number TEXT, 
+census_tract_number DOUBLE PRECISION, 
 population INTEGER, 
 minority_population DOUBLE PRECISION, 
 hud_median_family_income INTEGER, 
 tract_to_msamd_income DOUBLE PRECISION, 
 number_of_owner_occupied_units INTEGER, 
-number_of_1_to_4_family_units INTEGER
+number_of_1_to_4_family_units INTEGER,
+UNIQUE (
+    msamd, state_code, county_code, census_tract_number, population,
+    minority_population, hud_median_family_income, tract_to_msamd_income,
+    number_of_owner_occupied_units, number_of_1_to_4_family_units
+)
+);
+
+CREATE TABLE IF NOT EXISTS Property(
+property_id INTEGER PRIMARY KEY,
+property_type INTEGER REFERENCES PropertyTypes,
+owner_occupancy INTEGER REFERENCES OwnerOccupancies,
+location_id INTEGER REFERENCES Location
 );
 
 CREATE TABLE IF NOT EXISTS ApplicantRaces(
@@ -143,7 +150,7 @@ race_number INTEGER
 
 
 CREATE TABLE IF NOT EXISTS LoanApplication(
-application_id SERIAL PRIMARY KEY,
+application_id INTEGER PRIMARY KEY,
 applicant_id INTEGER REFERENCES Applicant, 
 co_applicant_id INTEGER REFERENCES CoApplicant,
 as_of_year INTEGER,
@@ -151,7 +158,7 @@ respondent_id TEXT,
 agency_code INTEGER REFERENCES Agencies,
 loan_type INTEGER REFERENCES LoanTypes,
 property_id INTEGER REFERENCES Property,
-location_id INTEGER REFERENCES Location,
+-- location_id INTEGER REFERENCES Location,
 loan_purpose INTEGER REFERENCES LoanPurposes,
 loan_amount_000s INTEGER,
 preapproval INTEGER REFERENCES Preapprovals,
@@ -162,11 +169,12 @@ hoepa_status INTEGER REFERENCES HoepaStatuses,
 lien_status INTEGER REFERENCES LienStatuses,
 edit_status INTEGER REFERENCES EditStatuses,
 sequence_number TEXT,
-application_date_indicator TEXT
+applications_date_indicator TEXT
 );
 
 CREATE TABLE IF NOT EXISTS ApplicationDenialReasons(
 application_id INTEGER REFERENCES LoanApplication, 
 denial_reason  INTEGER REFERENCES DenialReasons,
-denial_number INTEGER
+denial_number INTEGER,
+PRIMARY KEY(application_id, denial_number)
 );
