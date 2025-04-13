@@ -8,5 +8,5 @@
 
 4.We ran into problems creating the initial tables for our normalized relations due to the primary keys application_id and location_id, which are auto-incrementing rather than taken directly from the preliminary table. Another issue we encountered was setting up the foreign keys for our SQL relations, as referencing each table was not only time-consuming but also tricky to configure correctly. Additionally, we faced difficulties when recomposing the final CSV file from the normalized tables. Joining all the necessary relations involved a complex SQL query, and we ran into permission and administrative issues while executing export commands and performing joins across certain tables. This project took us about a week to complete.
 
-5.Script Videos: Videos are in step 2 and step 3 folders,
+5.Script Videos: Videos are in step 2 and step 3 folders.
 
