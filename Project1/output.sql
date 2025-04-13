@@ -299,4 +299,3 @@ INSERT INTO joined(
     LEFT JOIN denialreasons dr3 ON d3.denial_reason = dr3.denial_reason
     JOIN hoepastatuses hs ON la.hoepa_status = hs.hoepa_status
     JOIN lienstatuses ls ON la.lien_status = ls.lien_status
-  LIMIT 5
