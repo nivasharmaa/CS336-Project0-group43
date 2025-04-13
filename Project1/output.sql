@@ -76,7 +76,8 @@ hud_median_family_income TEXT,
 tract_to_msamd_income TEXT,
 number_of_owner_occupied_units TEXT,
 number_of_1_to_4_family_units TEXT,
-applications_date_indicator TEXT
+applications_date_indicator TEXT,
+id TEXT PRIMARY KEY
 );
 
 INSERT INTO joined(
@@ -157,7 +158,8 @@ INSERT INTO joined(
   tract_to_msamd_income,
   number_of_owner_occupied_units,
   number_of_1_to_4_family_units,
-  applications_date_indicator
+  applications_date_indicator,
+  id
 )
   SELECT
     la.as_of_year,
@@ -247,7 +249,8 @@ INSERT INTO joined(
     l.tract_to_msamd_income,
     l.number_of_owner_occupied_units,
     l.number_of_1_to_4_family_units,
-    la.applications_date_indicator
+    la.applications_date_indicator,
+    la.application_id AS id
   FROM loanapplication la
     JOIN agencies ag ON la.agency_code = ag.agency_code
     JOIN loantypes lt ON la.loan_type = lt.loan_type
