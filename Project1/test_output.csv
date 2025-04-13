@@ -1,6 +1,6 @@
-application_id,agency_name,loan_type_name
-1,Department of Housing and Urban Development,Conventional
-2,Department of Housing and Urban Development,FHA-insured
-3,Federal Reserve System,Conventional
-4,Department of Housing and Urban Development,Conventional
-5,Department of Housing and Urban Development,Conventional
+application_id
+1
+2
+3
+4
+5
