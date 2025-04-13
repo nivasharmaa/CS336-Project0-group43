@@ -252,24 +252,24 @@ INSERT INTO joined(
     la.applications_date_indicator,
     la.application_id AS id
   FROM loanapplication la
-    JOIN agencies ag ON la.agency_code = ag.agency_code
-    JOIN loantypes lt ON la.loan_type = lt.loan_type
-    JOIN property p ON la.property_id = p.property_id
-    JOIN propertytypes pt ON p.property_type = pt.property_type
-    JOIN owneroccupancies oo ON p.owner_occupancy = oo.owner_occupancy
-    JOIN loanpurposes lp ON la.loan_purpose = lp.loan_purpose
-    JOIN preapprovals pr ON la.preapproval = pr.preapproval
-    JOIN actionstaken at ON la.action_taken = at.action_taken
-    JOIN location l ON p.location_id = l.location_id
+    LEFT JOIN agencies ag ON la.agency_code = ag.agency_code
+    LEFT JOIN loantypes lt ON la.loan_type = lt.loan_type
+    LEFT JOIN property p ON la.property_id = p.property_id
+    LEFT JOIN propertytypes pt ON p.property_type = pt.property_type
+    LEFT JOIN owneroccupancies oo ON p.owner_occupancy = oo.owner_occupancy
+    LEFT JOIN loanpurposes lp ON la.loan_purpose = lp.loan_purpose
+    LEFT JOIN preapprovals pr ON la.preapproval = pr.preapproval
+    LEFT JOIN actionstaken at ON la.action_taken = at.action_taken
+    LEFT JOIN location l ON p.location_id = l.location_id
     LEFT JOIN msamds ms ON l.msamd = ms.msamd
-    JOIN states st ON l.state_code = st.state_code
-    JOIN counties c ON l.county_code = c.county_code
-    JOIN applicant a ON la.applicant_id = a.applicant_id
-    JOIN coapplicant ca ON la.co_applicant_id = ca.co_applicant_id
-    JOIN ethnicities ae ON a.applicant_ethnicity = ae.ethnicity
-    JOIN ethnicities ce ON ca.co_applicant_ethnicity = ce.ethnicity
-    JOIN sexes sa ON a.applicant_sex = sa.sex
-    JOIN sexes sc ON ca.co_applicant_sex = sc.sex
+    LEFT JOIN states st ON l.state_code = st.state_code
+    LEFT JOIN counties c ON l.county_code = c.county_code
+    LEFT JOIN applicant a ON la.applicant_id = a.applicant_id
+    LEFT JOIN coapplicant ca ON la.co_applicant_id = ca.co_applicant_id
+    LEFT JOIN ethnicities ae ON a.applicant_ethnicity = ae.ethnicity
+    LEFT JOIN ethnicities ce ON ca.co_applicant_ethnicity = ce.ethnicity
+    LEFT JOIN sexes sa ON a.applicant_sex = sa.sex
+    LEFT JOIN sexes sc ON ca.co_applicant_sex = sc.sex
     LEFT JOIN applicantRaces ar1 ON a.applicant_id = ar1.applicant_id AND ar1.race_number = 1
     LEFT JOIN races ra1 ON ar1.race = ra1.race
     LEFT JOIN applicantRaces ar2 ON a.applicant_id = ar2.applicant_id AND ar2.race_number = 2
@@ -290,12 +290,12 @@ INSERT INTO joined(
     LEFT JOIN races ra9 ON cr4.race = ra9.race
     LEFT JOIN coapplicantRaces cr5 ON ca.co_applicant_id = cr5.co_applicant_id AND cr5.race_number = 5
     LEFT JOIN races ra10 ON cr5.race = ra10.race
-    JOIN purchasertypes pt2 ON la.purchaser_type = pt2.purchaser_type
+    LEFT JOIN purchasertypes pt2 ON la.purchaser_type = pt2.purchaser_type
     LEFT JOIN applicationdenialreasons d1 ON la.application_id = d1.application_id AND d1.denial_number = 1
     LEFT JOIN denialreasons dr1 ON d1.denial_reason = dr1.denial_reason
     LEFT JOIN applicationdenialreasons d2 ON la.application_id = d2.application_id AND d2.denial_number = 2
     LEFT JOIN denialreasons dr2 ON d2.denial_reason = dr2.denial_reason
     LEFT JOIN applicationdenialreasons d3 ON la.application_id = d3.application_id AND d3.denial_number = 3
     LEFT JOIN denialreasons dr3 ON d3.denial_reason = dr3.denial_reason
-    JOIN hoepastatuses hs ON la.hoepa_status = hs.hoepa_status
-    JOIN lienstatuses ls ON la.lien_status = ls.lien_status
+    LEFT JOIN hoepastatuses hs ON la.hoepa_status = hs.hoepa_status
+    LEFT JOIN lienstatuses ls ON la.lien_status = ls.lien_status
