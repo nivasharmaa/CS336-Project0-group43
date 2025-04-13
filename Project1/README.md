@@ -6,7 +6,7 @@
 
 3.I feel like some interesting questions this database could answer could be anything related to the housing market to equity. This database could answer questions like, can you predict how likely a loan is to get denied based on sex, race, income, or ethnicity, or what areas in NJ have the largest loan amount relative to the average income level of the county? 
 
-4.We ran into problems creating the initial tables for our normalized relations due to the primary keys application_id and location_id, which are auto incrementing rather than taken directly from the preliminary table. This project took us about a week to complete.
+4.We ran into problems creating the initial tables for our normalized relations due to the primary keys application_id and location_id, which are auto incrementing rather than taken directly from the preliminary table. Another issue we ran into was setting up the foreign keys for our SQL relations as referencing each table was not only time consuming but tricky to set up. This project took us about a week to complete. 
 
 5.Script Videos:
 
