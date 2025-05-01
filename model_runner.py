@@ -4,6 +4,7 @@ from llama_cpp import Llama
 llm = Llama(
     model_path="./model.gguf",  # Path to the model file
     n_ctx=2048,             # Context length
+    verbose=False,        # Verbose output
 )
 
 
