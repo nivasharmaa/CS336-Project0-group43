@@ -5,14 +5,14 @@ from llama_cpp import Llama
 import paramiko
 
 # 1. Load the local LLM model
-llm = Llama(model_path="Phi-3.5-mini-instruct-Q4_K_M.gguf")
+llm = Llama(model_path="Phi-3.5-mini-instruct-Q4_K_M.gguf", n_ctx = 2048, verbose = False)
 
 # 2. Load the schema from file
 with open("create_schema.sql", "r") as f:
     schema = f.read()
 
 # Truncate to avoid exceeding context window
-schema = schema[:500]  # Or use fewer characters if needed
+schema = schema[:2048]  # Or use fewer characters if needed
 
 # 3. Construct the full prompt
 def build_prompt(question):
@@ -46,7 +46,7 @@ def run_remote_query(query, ssh_host, ssh_user):
         ssh.connect(ssh_host, username=ssh_user, password=password)
         escaped_query = shlex.quote(query)
         cmd = (
-            f"python3 Downloads/Proj2/ilab_script.py {escaped_query}"
+            f"python3 your specific ilab_script.py PATH {escaped_query}"
         )
         stdin, stdout, stderr = ssh.exec_command(cmd)
         
