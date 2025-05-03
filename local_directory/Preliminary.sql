@@ -80,7 +80,7 @@ applications_date_indicator TEXT
 );
 
 
-\copy preliminary_staging FROM 'Your CSV PATH' WITH DELIMITER ',' CSV HEADER;
+\copy preliminary_staging FROM 'CSV PATH' WITH DELIMITER ',' CSV HEADER;
 
 
 
