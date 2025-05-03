@@ -1,0 +1,64 @@
+This file explains the how to set up your database and test the llm on your local machine utilizing the SSH tunnel.
+
+In the ilab_directory are the files that are ran in the ilab environment. Run the Preliminary.sql script with the path 
+to your CSV data on line 83. Once the Preliminary script has ran and the preliminary table has been created in your 
+database with the data from the CSV, run the create_schema.sql script, which will create and insert all the data from
+preliminary into the normalized tables. Once this script has ran successfully, run the ilab_script.py script with the 
+usage python3 ilab_script.py "SELECT * FROM agencies;" which should prompt an output such as listing all the agencies,
+agency code, and agency abbreviation. NOTE that lines 6-8 in the ilab script must be edited to have YOUR specific
+information such as netID and ilab password.
+
+-e.g. output from above ilab_script query for agencies-
+
+agency_code     agency_name     agency_abbr
+7       Department of Housing and Urban Development     HUD
+9       Consumer Financial Protection Bureau    CFPB
+2       Federal Reserve System  FRS
+1       Office of the Comptroller of the Currency       OCC
+5       National Credit Union Administration    NCUA
+3       Federal Deposit Insurance Corporation   FDIC
+
+Once the ilab script is working correctly transition to the local_directory where all files that are utilized locally will
+be held (NOTE: I am not 100% sure if Preliminary.sql needs to be in the local directory but I have it stored there just 
+incase). In the database_llm.py script in your local directory, make sure that before running you have edited line 8 with
+the path to your model (if you just download the model to your local directory then you do not need to edit this part just
+leave it as is), as well as edited line 49 with the path to your ilab_script.py in your ilab_directory. Once that is
+changed, run the script locally with the usage python database_llm.py, which should prompt you for your ilab username
+and then the question you wish to ask. Once you ask a question the llm will respond with the query it will run on the
+schema, and then prompt you to input your ilab password. Below are three questions I asked in tandem and the responses 
+I got:
+
+------------------------------------------------------------------------------------------------------------------------------------
+-What are the top two most used agencies?-
+
+Running query: SELECT agency_name, COUNT(*) as agency_count FROM Agencies GROUP BY agency_name ORDER BY agency_count DESC LIMIT 2
+
+Query Results:
+agency_name     agency_count
+Office of the Comptroller of the Currency       1
+National Credit Union Administration    1
+
+------------------------------------------------------------------------------------------------------------------------------------
+-What is the most common loan denial reason?-
+
+Running query: SELECT d.denial_reason_name, COUNT(*) as num_denials FROM DenialReasons d GROUP BY d.denial_reason_name ORDER BY num_denials DESC LIMIT 1
+
+Query Results:
+denial_reason_name      num_denials
+Collateral      1
+
+------------------------------------------------------------------------------------------------------------------------------------
+What is the name of the loan type that is least commonly used?
+
+Running query: SELECT loan_type_name, COUNT(*) AS usage_count  FROM LoanTypes  GROUP BY loan_type_name  ORDER BY usage_count ASC  LIMIT 1
+
+Query Results:
+loan_type_name  usage_count
+FHA-insured     1
+
+------------------------------------------------------------------------------------------------------------------------------------
+NOTE: More complicated queries tend to result in an error where the llm will try to join tables by essentially making up a table that 
+doesn't actually exist in the schema, resulting in the query failing. This could be more of an issue though on how the question is 
+being asked rather than the query itself. 
+
+Transcripts used: 
