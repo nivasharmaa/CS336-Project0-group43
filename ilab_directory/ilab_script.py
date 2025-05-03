@@ -3,9 +3,9 @@ import psycopg2
 
 def run_query(query):
     conn = psycopg2.connect(
-        dbname='rfp46',  # user specific database, your netID
-        user='rfp46',    # usename, just netID
-        password='Prophet622#',  # your password for ilab
+        dbname='####',  # user specific database, your netID
+        user='####',    # usename, just netID
+        password='####',  # your password for ilab
         host='postgres.cs.rutgers.edu' # the host psql database
     )
     cur = conn.cursor()
