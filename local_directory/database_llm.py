@@ -5,14 +5,14 @@ from llama_cpp import Llama
 import paramiko
 
 # 1. Load the local LLM model
-llm = Llama(model_path="Phi-3.5-mini-instruct-Q4_K_M.gguf", n_ctx = 2048, verbose = False)
+llm = Llama(model_path="Phi-3.5-mini-instruct-Q4_K_M.gguf", n_ctx = 5000, verbose = False)
 
 # 2. Load the schema from file
 with open("create_schema.sql", "r") as f:
     schema = f.read()
 
 # Explicitly state context window
-schema = schema[:2048]  
+schema = schema[:5000]  
 
 # 3. Construct the full prompt
 def build_prompt(question):
