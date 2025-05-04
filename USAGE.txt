@@ -62,3 +62,338 @@ doesn't actually exist in the schema, resulting in the query failing. This could
 being asked rather than the query itself. 
 
 Transcripts used: 
+
+This file explains the how to set up your database and test the llm on your local machine utilizing the SSH tunnel.
+
+In the ilab_directory are the files that are ran in the ilab environment. Run the Preliminary.sql script with the path 
+to your CSV data on line 83. Once the Preliminary script has ran and the preliminary table has been created in your 
+database with the data from the CSV, run the create_schema.sql script, which will create and insert all the data from
+preliminary into the normalized tables. Once this script has ran successfully, run the ilab_script.py script with the 
+usage python3 ilab_script.py "SELECT * FROM agencies;" which should prompt an output such as listing all the agencies,
+agency code, and agency abbreviation. NOTE that lines 6-8 in the ilab script must be edited to have YOUR specific
+information such as netID and ilab password.
+
+-e.g. output from above ilab_script query for agencies-
+
+agency_code     agency_name     agency_abbr
+7       Department of Housing and Urban Development     HUD
+9       Consumer Financial Protection Bureau    CFPB
+2       Federal Reserve System  FRS
+1       Office of the Comptroller of the Currency       OCC
+5       National Credit Union Administration    NCUA
+3       Federal Deposit Insurance Corporation   FDIC
+
+Once the ilab script is working correctly transition to the local_directory where all files that are utilized locally will
+be held (NOTE: I am not 100% sure if Preliminary.sql needs to be in the local directory but I have it stored there just 
+incase). In the database_llm.py script in your local directory, make sure that before running you have edited line 8 with
+the path to your model (if you just download the model to your local directory then you do not need to edit this part just
+leave it as is), as well as edited line 49 with the path to your ilab_script.py in your ilab_directory. Once that is
+changed, run the script locally with the usage python database_llm.py, which should prompt you for your ilab username
+and then the question you wish to ask. Once you ask a question the llm will respond with the query it will run on the
+schema, and then prompt you to input your ilab password. Below are three questions I asked in tandem and the responses 
+I got:
+
+------------------------------------------------------------------------------------------------------------------------------------
+-What are the top two most used agencies?-
+
+Running query: SELECT agency_name, COUNT(*) as agency_count FROM Agencies GROUP BY agency_name ORDER BY agency_count DESC LIMIT 2
+
+Query Results:
+agency_name     agency_count
+Office of the Comptroller of the Currency       1
+National Credit Union Administration    1
+
+------------------------------------------------------------------------------------------------------------------------------------
+-What is the most common loan denial reason?-
+
+Running query: SELECT d.denial_reason_name, COUNT(*) as num_denials FROM DenialReasons d GROUP BY d.denial_reason_name ORDER BY num_denials DESC LIMIT 1
+
+Query Results:
+denial_reason_name      num_denials
+Collateral      1
+
+------------------------------------------------------------------------------------------------------------------------------------
+What is the name of the loan type that is least commonly used?
+
+Running query: SELECT loan_type_name, COUNT(*) AS usage_count  FROM LoanTypes  GROUP BY loan_type_name  ORDER BY usage_count ASC  LIMIT 1
+
+Query Results:
+loan_type_name  usage_count
+FHA-insured     1
+
+------------------------------------------------------------------------------------------------------------------------------------
+NOTE: More complicated queries tend to result in an error where the llm will try to join tables by essentially making up a table that 
+doesn't actually exist in the schema, resulting in the query failing. This could be more of an issue though on how the question is 
+being asked rather than the query itself. 
+
+Transcripts used: 
+------------------------------------------------------------------------------------------------------------------------------------
+Provide me a framwork for a python script that accepts SQL SELECT queries as a command line argument from trom an SSH server
+                       and explain how the script is utilized within the schehma.
+
+Here’s a complete framework and explanation for using your Python script to run SQL SELECT queries remotely from an SSH client (like your local LLM interface) on an ILAB server.
+
+Purpose of the Script
+The script is designed to:
+- Accept a SQL query (typically a SELECT statement) passed as a command-line argument
+- Run the query on your ILAB PostgreSQL database
+- Format and print the result in a tabular form
+
+
+import sys
+import psycopg2
+
+def run_query(query):
+    conn = psycopg2.connect(
+        dbname='####',  # user specific database, your netID
+        user='####',    # usename, just netID
+        password='####',  # your password for ilab
+        host='postgres.cs.rutgers.edu' # the host psql database
+    )
+    cur = conn.cursor()
+    cur.execute(query)
+    rows = cur.fetchall()
+    colnames = [desc[0] for desc in cur.description]
+
+    # table formatting
+    print("\t".join(colnames))
+    for row in rows:
+        print("\t".join(str(col) for col in row))
+
+    cur.close()
+    conn.close()
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        query = sys.argv[1]
+    else:
+        query = sys.stdin.read()
+    run_query(query)
+
+Why This Works Within the Schema
+The ILAB server has:
+- The full PostgreSQL database created using create_schema.sql
+- A preliminary staging table
+- All your normalized relational tables (LoanApplication, Applicant, etc.)
+
+When your script runs a query like:
+SELECT COUNT(*) FROM LoanApplication WHERE loan_amount_000s > applicant_income_000s;
+... it assumes: The tables LoanApplication and Applicant exist
+Foreign keys like LoanApplication.applicant_id = Applicant.applicant_id are valid
+You're only running read-only SELECT statements, which is safe and ideal for LLM interfaces
+------------------------------------------------------------------------------------------------------------------------------------
+What is an efficient database_llm.py script that uses llama_cpp, paramiko, and the Phi-3.5-mini-instruct-Q4_K_M.gguf llm that SSH tunnels 
+to Ilab, and explain in detail including the usage and how all parts are utilized.
+
+import getpass
+import shlex
+import sys
+from llama_cpp import Llama
+import paramiko
+
+# 1. Load the local LLM model
+llm = Llama(model_path="Phi-3.5-mini-instruct-Q4_K_M.gguf", n_ctx = 2048, verbose = False)
+
+# 2. Load the schema from file
+with open("create_schema.sql", "r") as f:
+    schema = f.read()
+
+# Explicitly state context window
+schema = schema[:2048]  
+
+# 3. Construct the full prompt
+def build_prompt(question):
+    return (
+        "Write an SQL SELECT query in response to the following schema and user question.\n"
+        "Schema:\n" + schema + "\n"
+        "Question:\n" + question + "\nSQL:"
+    )
+
+# 4. Extract the SQL query from LLM output 
+def extract_query(response_text):
+    lines = response_text.strip().splitlines()
+    in_sql = False
+    query_lines = []
+    for line in lines:
+        if line.strip().lower().startswith("select"):
+            in_sql = True
+        if in_sql:
+            query_lines.append(line)
+            if ";" in line:
+                break
+    return " ".join(query_lines).strip("; ") if query_lines else None
+
+# 5. Send the SQL query to ILAB script using SSH
+def run_remote_query(query, ssh_host, ssh_user):
+    password = getpass.getpass(f"Enter password for {ssh_user}@{ssh_host}: ")
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    try:
+        ssh.connect(ssh_host, username=ssh_user, password=password)
+        escaped_query = shlex.quote(query)
+        cmd = (
+            f"python3 PATH {escaped_query}"
+        )
+        stdin, stdout, stderr = ssh.exec_command(cmd)
+        
+        # Print results
+        output = stdout.read().decode().strip()
+        errors = stderr.read().decode().strip()
+        
+        if output:
+            print("\n Query Results:\n" + output)
+        if errors:
+            print("\n Remote Error:\n" + errors)
+
+    except Exception as e:
+        print(f" SSH or query error: {e}")
+    finally:
+        ssh.close()
+
+# 6. Interactive Q&A loop
+def main():
+    ssh_host = "ilab.cs.rutgers.edu"
+    ssh_user = input("Enter your ILAB username: ")
+
+    while True:
+        user_question = input("\nAsk a question about the database (or type 'exit'): ")
+        if user_question.strip().lower() == "exit":
+            print("Exiting.")
+            break
+
+        prompt = build_prompt(user_question)
+        llm_output = llm(prompt, max_tokens=200)
+        response = llm_output["choices"][0]["text"]
+
+        sql_query = extract_query(response)
+        if sql_query:
+            print("\nRunning query:", sql_query)
+            run_remote_query(sql_query, ssh_host, ssh_user)
+        else:
+            print("Could not extract a valid SQL query. Try rephrasing your question.")
+
+if __name__ == "__main__":
+    main()
+
+How It Works — Step-by-Step
+1. Load LLM (llama_cpp)
+- Llama(...) loads the Phi-3.5-mini-instruct model locally.
+
+- The n_ctx=2048 defines how much text the model can “see” at once (including prompt and generated SQL).
+
+- verbose=False suppresses internal logs.
+
+2. Load Schema
+- create_schema.sql is read into memory.
+
+- Truncated to 2048 characters to stay within the LLM’s context window.
+
+- Too much schema → model confusion or error.
+
+3. Prompt Generation
+- The prompt instructs the model to return an SQL SELECT query only.
+
+- Clear formatting helps guide accurate generation.
+
+4. Query Extraction
+- extract_query() finds the first line that starts with SELECT.
+
+- Grabs multi-line queries too (until a semicolon is found).
+
+5. Remote Query via SSH
+- Uses paramiko to SSH into ILAB.
+
+- Sends a command to run your ilab_script.py, passing the SQL query safely via shlex.quote().
+
+- Captures and prints both results and error messages from the remote server.
+
+6. Interactive Loop
+- Keeps prompting the user until "exit" is typed.
+
+- Calls the LLM, gets SQL, runs query remotely, shows results.
+
+-Example Usage-
+$ python database_llm.py
+Enter your ILAB username: rfp46
+
+Ask a question about the database (or type 'exit'): 
+Which states have the most mortgage applications?
+
+Running query: SELECT state_name, COUNT(*) FROM LoanApplication JOIN States ON ... GROUP BY state_name ORDER BY COUNT(*) DESC;
+
+Query Results:
+New Jersey    234
+New York      120
+...
+
+Ask a question about the database (or type 'exit'): exit
+Exiting.
+
+-Why Some Queries Fail-
+- Even with context trimmed, some reasons for failures:
+
+- LLM "hallucinates" column/table names if they’re not visible in the truncated schema.
+
+- LLM tries to guess joins without knowing exact foreign key relationships.
+
+- The model has no actual database introspection—it guesses from the schema text.
+------------------------------------------------------------------------------------------------------------------------------------
+What are five good questions that should be able to work with the mortgage schema and llm?
+
+1. “What is the average loan amount by loan type?”
+
+2. "What is the average applicant income for each loan purpose?"
+
+3. "Which agency received the most applications?"
+
+4. "What is the average income of male vs female applicants?"
+
+5. "What is the distribution of actions taken on loan applications?"
+------------------------------------------------------------------------------------------------------------------------------------
+-Output I got for those queries-
+
+1. Running query: SELECT lt.loan_type_name, AVG(la.loan_amount_000s) AS average_loan_amount FROM LoanTypes lt JOIN LoanApplication la ON lt.loan_type = la.loan_type GROUP BY lt.loan_type_name
+
+ Query Results:
+loan_type_name  average_loan_amount
+Conventional    321.0708259493797479
+FHA-insured     243.6502692689868371
+FSA/RHS-guaranteed      173.7026112185686654
+VA-guaranteed   272.3401704007573367
+
+2. Running query: SELECT L.loan_purpose_name, AVG(A.applicant_income_000s) AS avg_applicant_income FROM LoanPurposes L JOIN LoanApplication LA ON L.loan_purpose = LA.loan_purpose JOIN Applicant A ON LA.applicant_id = A.applicant_id GROUP BY L.loan_purpose_name
+
+ Query Results:
+loan_purpose_name       avg_applicant_income
+Home improvement        477.4583191994572592
+Home purchase   143.8739741569492594
+Refinancing     137.5449603643398908
+
+3. Running query: SELECT a.agency_abbr, COUNT(l.application_id) as application_count FROM Agencies a JOIN LoanApplication l ON l.agency_code = a.agency_code GROUP BY a.agency_abbr ORDER BY application_count DESC LIMIT 1
+
+ Query Results:
+agency_abbr     application_count
+HUD     196440
+
+4. Running query: SELECT      Sexes.sex_name,      AVG(Applicant.applicant_income_000s) AS average_income FROM      Applicant JOIN      Sexes ON Applicant.applicant_sex = Sexes.sex GROUP BY      Sexes.sex_name
+
+ Query Results:
+sex_name        average_income
+Female  204.9584450561891483
+Information not provided by applicant in mail, Internet, or telephone application       162.7400483334093293
+Male    153.5682173467737588
+Not applicable  116.5830517286197037
+
+5. Running query: SELECT action_taken_name, COUNT(*)  FROM ActionsTaken  JOIN LoanApplication ON ActionsTaken.action_taken = LoanApplication.action_taken  GROUP BY action_taken_name
+
+ Query Results:
+action_taken_name       count
+Application approved but not accepted   9586
+Application denied by financial institution     49214
+Application withdrawn by applicant      48680
+File closed for incompleteness  17940
+Loan originated 169196
+Loan purchased by the institution       54938
+Preapproval request approved but not accepted   4
+Preapproval request denied by financial institution     5
