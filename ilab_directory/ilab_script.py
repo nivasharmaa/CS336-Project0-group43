@@ -1,5 +1,6 @@
 import sys
 import psycopg2
+import pandas as pd
 
 def run_query(query):
     conn = psycopg2.connect(
@@ -12,11 +13,8 @@ def run_query(query):
     cur.execute(query)
     rows = cur.fetchall()
     colnames = [desc[0] for desc in cur.description]
-
-    # table formatting
-    print("\t".join(colnames))
-    for row in rows:
-        print("\t".join(str(col) for col in row))
+    df = pd.DataFrame(rows, columns = colnames)
+    print(df.to_markdown(index = False))
 
     cur.close()
     conn.close()

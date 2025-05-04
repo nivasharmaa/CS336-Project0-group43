@@ -31,30 +31,33 @@ I got:
 ------------------------------------------------------------------------------------------------------------------------------------
 -What are the top two most used agencies?-
 
-Running query: SELECT agency_name, COUNT(*) as agency_count FROM Agencies GROUP BY agency_name ORDER BY agency_count DESC LIMIT 2
+Running query: SELECT agency_name, COUNT(*) as application_count FROM LoanApplication JOIN Agencies ON LoanApplication.agency_code = Agencies.agency_code GROUP BY agency_name ORDER BY application_count DESC LIMIT 2
 
 Query Results:
-agency_name     agency_count
-Office of the Comptroller of the Currency       1
-National Credit Union Administration    1
+| agency_name                                 |   application_count |
+|:--------------------------------------------|--------------------:|
+| Department of Housing and Urban Development |              196440 |
+| Consumer Financial Protection Bureau        |              113439 |
 
 ------------------------------------------------------------------------------------------------------------------------------------
 -What is the most common loan denial reason?-
 
-Running query: SELECT d.denial_reason_name, COUNT(*) as num_denials FROM DenialReasons d GROUP BY d.denial_reason_name ORDER BY num_denials DESC LIMIT 1
+Running query: SELECT d.denial_reason_name, COUNT(*) as total FROM DenialReasons d JOIN ApplicationDenialReasons dar ON d.denial_reason = dar.denial_reason GROUP BY d.denial_reason_name ORDER BY total DESC LIMIT 1
 
 Query Results:
-denial_reason_name      num_denials
-Collateral      1
+| denial_reason_name   |   num_applications |
+|:---------------------|-------------------:|
+| Debt-to-income ratio |              11821 |
 
 ------------------------------------------------------------------------------------------------------------------------------------
 What is the name of the loan type that is least commonly used?
 
-Running query: SELECT loan_type_name, COUNT(*) AS usage_count  FROM LoanTypes  GROUP BY loan_type_name  ORDER BY usage_count ASC  LIMIT 1
+Running query: SELECT lt.loan_type_name, COUNT(*) as usage_count FROM LoanTypes lt LEFT JOIN LoanApplication la ON lt.loan_type = la.loan_type GROUP BY lt.loan_type_name ORDER BY usage_count ASC LIMIT 1
 
 Query Results:
-loan_type_name  usage_count
-FHA-insured     1
+| loan_type_name     |   usage_count |
+|:-------------------|--------------:|
+| FSA/RHS-guaranteed |          2068 |
 
 ------------------------------------------------------------------------------------------------------------------------------------
 NOTE: More complicated queries tend to result in an error where the llm will try to join tables by essentially making up a table that 
@@ -276,7 +279,7 @@ Exiting.
 ------------------------------------------------------------------------------------------------------------------------------------
 What are five good questions that should be able to work with the mortgage schema and llm?
 
-1. “What is the average loan amount by loan type?”
+1. "What is the average loan amount by loan type?"
 
 2. "What is the average applicant income for each loan purpose?"
 

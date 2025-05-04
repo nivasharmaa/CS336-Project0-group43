@@ -37,16 +37,16 @@ def extract_query(response_text):
     return " ".join(query_lines).strip("; ") if query_lines else None
 
 # 5. Send the SQL query to ILAB script using SSH
-def run_remote_query(query, ssh_host, ssh_user):
-    password = getpass.getpass(f"Enter password for {ssh_user}@{ssh_host}: ")
+def run_remote_query(query, ssh_host, ssh_user, ssh_password):
+    
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     try:
-        ssh.connect(ssh_host, username=ssh_user, password=password)
+        ssh.connect(ssh_host, username=ssh_user, password=ssh_password)
         escaped_query = shlex.quote(query)
         cmd = (
-            f"python3 Downloads/Proj2/ilab_script.py {escaped_query}"
+            f"python3 /common/home/rb1395/Documents/CS336-Project0-group43/ilab_directory/ilab_script.py {escaped_query}"
         )
         stdin, stdout, stderr = ssh.exec_command(cmd)
         
@@ -66,8 +66,9 @@ def run_remote_query(query, ssh_host, ssh_user):
 
 # 6. Interactive Q&A loop
 def main():
-    ssh_host = "ilab.cs.rutgers.edu"
-    ssh_user = input("Enter your ILAB username: ")
+    ssh_host = "iLab.cs.rutgers.edu"
+    ssh_user = input("Enter your iLab username: ")
+    ssh_password = getpass.getpass(f"Enter password for {ssh_user}@{ssh_host}: ")
 
     while True:
         user_question = input("\nAsk a question about the database (or type 'exit'): ")
@@ -82,7 +83,7 @@ def main():
         sql_query = extract_query(response)
         if sql_query:
             print("\nRunning query:", sql_query)
-            run_remote_query(sql_query, ssh_host, ssh_user)
+            run_remote_query(sql_query, ssh_host, ssh_user, ssh_password)
         else:
             print("Could not extract a valid SQL query. Try rephrasing your question.")
 
