@@ -2,21 +2,21 @@
 
 1) Team Member & Contributions:
    
-   Rohit Bhagat - rb1395\
+   Rohit Bhagat - rb1395
    - Configured and tested Python environment; managed dependencies in `requirements.txt`
    - Implemented basic error handling in `database_llm.py` and stub scripts
    - Contributed to SSH key and permissions setup on ILAB
    
-   Roman Perry - rfp46\
+   Roman Perry - rfp46
    - Lead developer of the ILAB stub script (`ilab_script.py`) and SSH tunnel setup
    - Designed and implemented the schema loader scripts (`Preliminary.sql`, `create_schema.sql`)
    - Curated and normalized the database schema; performed data validation and ensured seamless command-line integration
      
-   Niva Sharma - nas315\
+   Niva Sharma - nas315
    - Drafted and organized the README and usage documentation
    - Assisted with prompt engineering and error handling logic
      
-   Rishabh Sheth - rs2299\
+   Rishabh Sheth - rs2299
    - Generated sample queries and validated their results against the schema
    - Performed end-to-end testing of the full workflow and created a demo video showcasing queries
    - Captured and organized prompt–response transcripts
