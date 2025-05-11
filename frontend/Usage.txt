@@ -1,0 +1,81 @@
+Frontend Usage and Setup Guide
+
+This file describes how to install, run, and test the React + Next.js + Chakra UI frontend for *The Query Pilot* project.
+
+---
+
+1. Prerequisites
+
+   * Node.js v18+ and npm installed locally ([https://nodejs.org](https://nodejs.org))
+   * Git access to the `CS336-group43` repository, branch `Project-EC`
+
+2. Directory Structure
+
+   ```
+   CS336-group43/
+   ├── backend/               # Python/LLM backend (database_llm.py, FastAPI wrapper)
+   ├── frontend/              # Next.js + Chakra UI frontend
+   │   ├── src/app/
+   │   │   ├── page.tsx              # Homepage with question textbox
+   │   │   ├── results/page.tsx      # Results page (fetch & render)
+   │   │   └── api/ask/route.ts      # Next.js proxy to backend API
+   │   ├── src/components/
+   │   │   ├── Header.tsx            # Project header bar
+   │   │   ├── QueryResult.tsx       # Layout for question, SQL, and table
+   │   │   └── ResultsTable.tsx      # Interactive table for query results
+   │   └── src/app/providers.tsx     # ChakraProvider wrapper
+   └── README.md
+   ```
+
+3. Installation
+
+   ```bash
+   cd CS336-group43/frontend
+   npm install
+   ```
+
+4. Running in Development Mode
+
+   ```bash
+   npm run dev
+   ```
+
+   Open your browser to `http://localhost:3000` to view the homepage.
+
+5. Using the Frontend
+
+   * Homepage (`/`)
+
+     * Textbox to enter a natural-language database question.
+     * “🚀 Query” button or press Enter to submit.
+   * Results page (`/results`)
+
+     * Navigated to on submit.
+     * URL format: `http://localhost:3000/results?q=<encoded question>`
+     * Displays loading, then:
+
+       * Your original question
+       * The LLM-generated SQL
+       * The tabular query results
+   * API Proxy
+
+     * Frontend calls `POST /api/ask`
+     * That route proxies to the FastAPI backend at `http://localhost:8000/ask`
+
+6. Integrating the Backend
+
+   Start your FastAPI server:
+
+   ```bash
+   cd CS336-group43/backend
+   uvicorn fastapi_app:app --host 0.0.0.0 --port 8000
+   ```
+
+   The Next.js API route in `src/app/api/ask/route.ts` forwards requests here.
+
+7. Deployment Notes
+
+   * Deploy the **frontend** (e.g., on Vercel) from the `/frontend` folder.
+   * Configure the backend URL in `route.ts` or via environment variables if deploying.
+
+
