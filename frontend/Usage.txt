@@ -47,7 +47,7 @@ This file describes how to install, run, and test the React + Next.js + Chakra U
    * Homepage (`/`)
 
      * Textbox to enter a natural-language database question.
-     * “🚀 Query” button or press Enter to submit.
+     * “Query” button or press Enter to submit.
    * Results page (`/results`)
 
      * Navigated to on submit.
